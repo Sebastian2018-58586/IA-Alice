@@ -5,6 +5,7 @@ class ChessGUI:
     def __init__(self, root):
         self.root = root
         self.root.title("Ajedrez Pierde-Gana")
+        self.root.configure(bg="black")  # Fondo negro para la ventana
 
         # Configurar tablero inicial y tablero de jugadas
         self.board1_state = self.create_initial_board()
@@ -18,10 +19,14 @@ class ChessGUI:
         self.initialize_boards()
 
         # Etiquetas informativas y botones
-        self.info_label = tk.Label(root, text="Turno: Blancas", font=("Arial", 14))
+        self.info_label = tk.Label(
+            root, text="Turno: Blancas", font=("Arial", 14), fg="white", bg="black"
+        )
         self.info_label.pack(pady=10)
 
-        self.reset_button = tk.Button(root, text="Reiniciar Juego", command=self.reset_game)
+        self.reset_button = tk.Button(
+            root, text="Reiniciar Juego", command=self.reset_game, bg="gray", fg="white"
+        )
         self.reset_button.pack(pady=10)
 
     def create_initial_board(self):
@@ -43,11 +48,11 @@ class ChessGUI:
 
     def create_board_frame(self, title):
         """Crea un marco para un tablero con título."""
-        frame = tk.Frame(self.root)
+        frame = tk.Frame(self.root, bg="black")
         frame.pack(side=tk.LEFT, padx=20, pady=20)
-        label = tk.Label(frame, text=title, font=("Arial", 16))
+        label = tk.Label(frame, text=title, font=("Arial", 16), fg="white", bg="black")
         label.pack()
-        board_canvas = tk.Canvas(frame, width=480, height=480)
+        board_canvas = tk.Canvas(frame, width=480, height=480, bg="black", highlightthickness=0)
         board_canvas.pack()
         return board_canvas
 
@@ -65,7 +70,7 @@ class ChessGUI:
                 color = "#FFCC99" if (row + col) % 2 == 0 else "#D2B48C"
                 x1, y1 = col * square_size, row * square_size
                 x2, y2 = x1 + square_size, y1 + square_size
-                canvas.create_rectangle(x1, y1, x2, y2, fill=color)
+                canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="")
 
                 # Dibujar las piezas si existen
                 piece = board_state[row][col]
@@ -95,4 +100,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = ChessGUI(root)
     root.mainloop()
-
