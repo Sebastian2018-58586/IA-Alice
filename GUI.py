@@ -1,23 +1,23 @@
-import tkinter as tk
+import tkinter as tk 
 from PIL import Image, ImageDraw, ImageTk
 
 class ChessGUI:
     def __init__(self, root):
         # Configuración inicial de la ventana principal
         self.root = root
-        self.root.title("Ajedrez Pierde-Gana")  # Título de la ventana
-        self.root.configure(bg="black")  # Fondo negro para la ventana principal
+        self.root.title("Ajedrez Pierde-Gana")
+        self.root.configure(bg="black")
 
         # Configurar el estado inicial de los tableros
-        self.board1_state = self.create_initial_board()  # Tablero 1 con la posición inicial de las piezas
-        self.board2_state = self.create_empty_board()  # Tablero 2 vacío al inicio
+        self.board1_state = self.create_initial_board()
+        self.board2_state = self.create_empty_board()
 
         # Inicializamos el atributo selected_piece como None
-        self.selected_piece = None  # Este atributo se usará para almacenar la pieza seleccionada
+        self.selected_piece = None
 
         # Crear y configurar los marcos para ambos tableros
-        self.board1_frame = self.create_board_frame("Tablero 1 (Juego)")  # Tablero principal
-        self.board2_frame = self.create_board_frame("Tablero 2 (Movimientos)")  # Tablero secundario
+        self.board1_frame = self.create_board_frame("Tablero 1 (Juego)")
+        self.board2_frame = self.create_board_frame("Tablero 2 (Movimientos)")
 
         # Dibujar los tableros gráficos
         self.initialize_boards()
@@ -26,13 +26,13 @@ class ChessGUI:
         self.info_label = tk.Label(
             root, text="Turno: Blancas", font=("Arial", 14), fg="white", bg="black"
         )
-        self.info_label.pack(pady=10)  # Espaciado vertical
+        self.info_label.pack(pady=10)
 
         # Crear etiqueta de error para mostrar los mensajes de error
         self.error_label = tk.Label(
             root, text="", font=("Arial", 12), fg="red", bg="black"
         )
-        self.error_label.pack(pady=10)  # Espaciado vertical
+        self.error_label.pack(pady=10)
 
         # Botón para reiniciar el juego
         self.reset_button = tk.Button(
@@ -41,190 +41,111 @@ class ChessGUI:
         self.reset_button.pack(pady=10)
 
     def create_initial_board(self):
-        """Crea el estado inicial del tablero con las piezas en sus posiciones iniciales."""
         return [
-            ["t", "c", "a", "d", "r", "a", "c", "t"],  # Fila 1: Piezas negras
-            ["p"] * 8,  # Fila 2: Peones negros
-            ["."] * 8,  # Filas vacías
+            ["t", "c", "a", "d", "r", "a", "c", "t"],
+            ["p"] * 8,
             ["."] * 8,
             ["."] * 8,
             ["."] * 8,
-            ["P"] * 8,  # Fila 7: Peones blancos
-            ["T", "C", "A", "D", "R", "A", "C", "T"]   # Fila 8: Piezas blancas
+            ["."] * 8,
+            ["P"] * 8,
+            ["T", "C", "A", "D", "R", "A", "C", "T"]
         ]
 
     def create_empty_board(self):
-        """Crea un tablero vacío."""
-        return [["."] * 8 for _ in range(8)]  # 8x8 con casillas vacías
+        return [["."] * 8 for _ in range(8)]
 
     def create_board_frame(self, title):
-        """Crea un marco que contiene un tablero gráfico y su título."""
-        frame = tk.Frame(self.root, bg="black")  # Marco con fondo negro
-        frame.pack(side=tk.LEFT, padx=20, pady=20)  # Espaciado entre marcos
-        
-        # Etiqueta del título del tablero
+        frame = tk.Frame(self.root, bg="black")
+        frame.pack(side=tk.LEFT, padx=20, pady=20)
         label = tk.Label(frame, text=title, font=("Arial", 16), fg="white", bg="black")
         label.pack()
-
-        # Canvas para dibujar el tablero
         board_canvas = tk.Canvas(frame, width=480, height=480, bg="black", highlightthickness=0)
         board_canvas.pack()
         return board_canvas
 
     def initialize_boards(self):
-        """Dibuja los tableros iniciales en sus respectivos marcos."""
-        self.draw_board(self.board1_frame, self.board1_state)  # Dibuja Tablero 1
-        self.draw_board(self.board2_frame, self.board2_state)  # Dibuja Tablero 2
+        self.draw_board(self.board1_frame, self.board1_state)
+        self.draw_board(self.board2_frame, self.board2_state)
 
     def draw_board(self, canvas, board_state):
-        """Dibuja un tablero y sus piezas en un canvas."""
-        square_size = 60  # Tamaño de cada casilla
+        square_size = 60
         for row in range(8):
             for col in range(8):
-                # Alternar colores entre naranja claro y café claro para las casillas
                 color = "#FFCC99" if (row + col) % 2 == 0 else "#D2B48C"
                 x1, y1 = col * square_size, row * square_size
                 x2, y2 = x1 + square_size, y1 + square_size
-                
-                # Dibuja la casilla
                 canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="")
-
-                # Asocia el evento de clic a cada casilla
                 canvas.tag_bind(
                     canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline=""),
                     "<Button-1>", lambda event, r=row, c=col: self.on_square_click(event, r, c)
                 )
-
-                # Dibujar la pieza si existe en la posición actual
                 piece = board_state[row][col]
                 if piece != ".":
                     self.draw_piece(canvas, piece, x1, y1, square_size)
 
     def draw_piece(self, canvas, piece, x, y, size):
-        """Dibuja una pieza en una posición específica del tablero."""
         piece_symbols = {
-            "p": "♟", "t": "♜", "c": "♞", "a": "♝", "d": "♛", "r": "♚",  # Negras
-            "P": "♙", "T": "♖", "C": "♘", "A": "♗", "D": "♕", "R": "♔"   # Blancas
+            "p": "♟", "t": "♜", "c": "♞", "a": "♝", "d": "♛", "r": "♚",
+            "P": "♙", "T": "♖", "C": "♘", "A": "♗", "D": "♕", "R": "♔"
         }
-        color = "white" if piece.isupper() else "black"  # Determina el color según la pieza
-        font_size = int(size * 0.6)  # Calcula el tamaño de la fuente relativo al tamaño de la casilla
+        color = "white" if piece.isupper() else "black"
+        font_size = int(size * 0.6)
         canvas.create_text(
             x + size / 2, y + size / 2, text=piece_symbols[piece], fill=color, font=("Arial", font_size)
         )
 
     def reset_game(self):
-        """Reinicia los tableros al estado inicial.""" 
-        self.board1_state = self.create_initial_board()  # Reinicia Tablero 1
-        self.board2_state = self.create_empty_board()  # Reinicia Tablero 2
-        self.selected_piece = None  # Reinicia la selección de la pieza
-        self.error_label.config(text="")  # Limpia cualquier mensaje de error previo
-        self.initialize_boards()  # Redibuja los tableros
+        self.board1_state = self.create_initial_board()
+        self.board2_state = self.create_empty_board()
+        self.selected_piece = None
+        self.error_label.config(text="")
+        self.initialize_boards()
 
     def on_square_click(self, event, row, col):
-        """Maneja los clics en las casillas del tablero."""
         if self.selected_piece is None:
-            # Seleccionamos una pieza si la casilla contiene una pieza
             piece = self.board1_state[row][col]
             if piece != ".":
-                self.selected_piece = (row, col)  # Guardamos la pieza seleccionada
-                # Aquí podemos resaltar la pieza seleccionada si lo deseas
+                self.selected_piece = (row, col)
                 print(f"Seleccionaste la pieza {piece} en la casilla ({row}, {col})")
             else:
                 self.show_error("Haz clic en una casilla con una pieza")
         else:
-            # Movemos la pieza seleccionada a la nueva casilla
             from_row, from_col = self.selected_piece
-            piece = self.board1_state[from_row][from_col]  # Pieza seleccionada
-            
+            piece = self.board1_state[from_row][from_col]
             if self.is_valid_move(piece, from_row, from_col, row, col):
-                # Realiza el movimiento (cambia el estado del tablero)
                 self.board1_state[row][col] = piece
-                self.board1_state[from_row][from_col] = "."  # Vacía la casilla original
-                self.selected_piece = None  # Deselecciona la pieza
-                self.initialize_boards()  # Redibuja los tableros para reflejar el movimiento
+                self.board1_state[from_row][from_col] = "."
+                self.board2_state[7 - row][7 - col] = piece
+                self.board2_state[7 - from_row][7 - from_col] = "."
+                self.selected_piece = None
+                self.initialize_boards()
                 print(f"Moviste la pieza {piece} de ({from_row}, {from_col}) a ({row}, {col})")
             else:
                 self.show_error(f"Movimiento no válido para la pieza {piece}")
 
     def show_error(self, message):
-        """Muestra un mensaje de error en la pantalla."""
         self.error_label.config(text=message)
 
     def is_valid_move(self, piece, from_row, from_col, to_row, to_col):
-        """Valida si el movimiento de una pieza es legal."""
-        # Verifica si la posición destino está dentro del tablero
         if not (0 <= to_row < 8 and 0 <= to_col < 8):
             return False
 
-        # Verifica si la posición destino tiene una pieza del mismo color
         target_piece = self.board1_state[to_row][to_col]
         if piece.isupper() and target_piece.isupper():
-            return False  # Las blancas no pueden capturar sus propias piezas
+            return False
         if piece.islower() and target_piece.islower():
-            return False  # Las negras no pueden capturar sus propias piezas
+            return False
 
-        # Lógica para peones (ya implementada)
-        if piece == "P":  # Peón blanco
-            if from_col == to_col and from_row - 1 == to_row and target_piece == ".":
-                return True
-            elif from_col == to_col and from_row == 6 and to_row == 4 and target_piece == ".":
-                return True
-            elif abs(from_col - to_col) == 1 and from_row - 1 == to_row and target_piece.islower():
-                return True
-        elif piece == "p":  # Peón negro
-            if from_col == to_col and from_row + 1 == to_row and target_piece == ".":
-                return True
-            elif from_col == to_col and from_row == 1 and to_row == 3 and target_piece == ".":
-                return True
-            elif abs(from_col - to_col) == 1 and from_row + 1 == to_row and target_piece.isupper():
-                return True
-
-        # Lógica para el caballo (C/c)
-        if piece in ("C", "c"):
-            if (abs(from_row - to_row), abs(from_col - to_col)) in [(2, 1), (1, 2)]:
-                return True
-
-        # Lógica para la torre (T/t)
-        if piece in ("T", "t"):
-            if from_row == to_row or from_col == to_col:
-                if self.is_path_clear(from_row, from_col, to_row, to_col):
-                    return True
-
-        # Lógica para el alfil (A/a)
-        if piece in ("A", "a"):
-            if abs(from_row - to_row) == abs(from_col - to_col):
-                if self.is_path_clear(from_row, from_col, to_row, to_col):
-                    return True
-
-        # Lógica para la reina (D/d)
-        if piece in ("D", "d"):
-            if from_row == to_row or from_col == to_col or abs(from_row - to_row) == abs(from_col - to_col):
-                if self.is_path_clear(from_row, from_col, to_row, to_col):
-                    return True
-
-        # Lógica para el rey (R/r)
-        if piece in ("R", "r"):
-            if max(abs(from_row - to_row), abs(from_col - to_col)) == 1:
-                return True
-
-        return False
-
-    def is_path_clear(self, from_row, from_col, to_row, to_col):
-        """Verifica si no hay piezas bloqueando el camino para movimientos de torre, alfil y reina."""
-        step_row = (to_row - from_row) and (to_row - from_row) // abs(to_row - from_row)
-        step_col = (to_col - from_col) and (to_col - from_col) // abs(to_col - from_col)
-
-        current_row, current_col = from_row + step_row, from_col + step_col
-        while (current_row, current_col) != (to_row, to_col):
-            if self.board1_state[current_row][current_col] != ".":
-                return False  # Hay una pieza bloqueando el camino
-            current_row += step_row
-            current_col += step_col
+        mirror_row, mirror_col = 7 - to_row, 7 - to_col
+        if self.board2_state[mirror_row][mirror_col] != ".":
+            self.show_error("No puedes mover aquí porque la casilla espejo está ocupada")
+            return False
 
         return True
 
 # Crear ventana principal
 if __name__ == "__main__":
-    root = tk.Tk()  # Inicializa la ventana principal
-    app = ChessGUI(root)  # Crea una instancia de la interfaz gráfica
-    root.mainloop()  # Inicia el bucle principal de la interfaz
+    root = tk.Tk()
+    app = ChessGUI(root)
+    root.mainloop()
