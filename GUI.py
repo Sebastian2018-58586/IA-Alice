@@ -1,6 +1,6 @@
 import tkinter as tk
 from PIL import Image, ImageDraw, ImageTk
-"FUNCIONA EL CLICK EN EL 2DO TABLERO"
+
 class ChessGUI:
     def __init__(self, root):
         # Configuración inicial de la ventana principal
@@ -27,6 +27,12 @@ class ChessGUI:
             root, text="Turno: Blancas", font=("Arial", 14), fg="white", bg="black"
         )
         self.info_label.pack(pady=10)  # Espaciado vertical
+
+        # Crear etiqueta de error para mostrar los mensajes de error
+        self.error_label = tk.Label(
+            root, text="", font=("Arial", 12), fg="red", bg="black"
+        )
+        self.error_label.pack(pady=10)  # Espaciado vertical
 
         # Botón para reiniciar el juego
         self.reset_button = tk.Button(
@@ -111,6 +117,7 @@ class ChessGUI:
         self.board1_state = self.create_initial_board()  # Reinicia Tablero 1
         self.board2_state = self.create_empty_board()  # Reinicia Tablero 2
         self.selected_piece = None  # Reinicia la selección de la pieza
+        self.error_label.config(text="")  # Limpia cualquier mensaje de error previo
         self.initialize_boards()  # Redibuja los tableros
 
     def on_square_click(self, event, row, col):
@@ -123,7 +130,7 @@ class ChessGUI:
                 # Aquí podemos resaltar la pieza seleccionada si lo deseas
                 print(f"Seleccionaste la pieza {piece} en la casilla ({row}, {col})")
             else:
-                print("Haz clic en una casilla con una pieza")
+                self.show_error("Haz clic en una casilla con una pieza")
         else:
             # Movemos la pieza seleccionada a la nueva casilla
             from_row, from_col = self.selected_piece
@@ -137,10 +144,13 @@ class ChessGUI:
                 self.initialize_boards()  # Redibuja los tableros para reflejar el movimiento
                 print(f"Moviste la pieza {piece} de ({from_row}, {from_col}) a ({row}, {col})")
             else:
-                print(f"Movimiento no válido para la pieza {piece}")
+                self.show_error(f"Movimiento no válido para la pieza {piece}")
+
+    def show_error(self, message):
+        """Muestra un mensaje de error en la pantalla."""
+        self.error_label.config(text=message)
 
     def is_valid_move(self, piece, from_row, from_col, to_row, to_col):
-          
         """Valida si el movimiento de una pieza es legal."""
         # Verifica si la posición destino está dentro del tablero
         if not (0 <= to_row < 8 and 0 <= to_col < 8):
