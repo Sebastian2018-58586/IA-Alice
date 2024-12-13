@@ -140,24 +140,78 @@ class ChessGUI:
                 print(f"Movimiento no válido para la pieza {piece}")
 
     def is_valid_move(self, piece, from_row, from_col, to_row, to_col):
-        """Valida si el movimiento de una pieza es legal (para simplificación, comenzamos con peones)."""
-        if piece == "P":  # Peón blanco
-            if from_col == to_col and from_row - 1 == to_row and self.board1_state[to_row][to_col] == ".":
-                return True  # Movimiento hacia adelante de una casilla
-            elif from_col == to_col and from_row == 6 and to_row == 4 and self.board1_state[to_row][to_col] == ".":
-                return True  # Movimiento hacia adelante de dos casillas (solo al inicio)
-            elif abs(from_col - to_col) == 1 and from_row - 1 == to_row and self.board1_state[to_row][to_col].islower():
-                return True  # Captura en diagonal
-        elif piece == "p":  # Peón negro
-            if from_col == to_col and from_row + 1 == to_row and self.board1_state[to_row][to_col] == ".":
-                return True  # Movimiento hacia adelante de una casilla
-            elif from_col == to_col and from_row == 1 and to_row == 3 and self.board1_state[to_row][to_col] == ".":
-                return True  # Movimiento hacia adelante de dos casillas (solo al inicio)
-            elif abs(from_col - to_col) == 1 and from_row + 1 == to_row and self.board1_state[to_row][to_col].isupper():
-                return True  # Captura en diagonal
+          
+        """Valida si el movimiento de una pieza es legal."""
+        # Verifica si la posición destino está dentro del tablero
+        if not (0 <= to_row < 8 and 0 <= to_col < 8):
+            return False
 
-        # Lógica adicional para otras piezas vendrá después
+        # Verifica si la posición destino tiene una pieza del mismo color
+        target_piece = self.board1_state[to_row][to_col]
+        if piece.isupper() and target_piece.isupper():
+            return False  # Las blancas no pueden capturar sus propias piezas
+        if piece.islower() and target_piece.islower():
+            return False  # Las negras no pueden capturar sus propias piezas
+
+        # Lógica para peones (ya implementada)
+        if piece == "P":  # Peón blanco
+            if from_col == to_col and from_row - 1 == to_row and target_piece == ".":
+                return True
+            elif from_col == to_col and from_row == 6 and to_row == 4 and target_piece == ".":
+                return True
+            elif abs(from_col - to_col) == 1 and from_row - 1 == to_row and target_piece.islower():
+                return True
+        elif piece == "p":  # Peón negro
+            if from_col == to_col and from_row + 1 == to_row and target_piece == ".":
+                return True
+            elif from_col == to_col and from_row == 1 and to_row == 3 and target_piece == ".":
+                return True
+            elif abs(from_col - to_col) == 1 and from_row + 1 == to_row and target_piece.isupper():
+                return True
+
+        # Lógica para el caballo (C/c)
+        if piece in ("C", "c"):
+            if (abs(from_row - to_row), abs(from_col - to_col)) in [(2, 1), (1, 2)]:
+                return True
+
+        # Lógica para la torre (T/t)
+        if piece in ("T", "t"):
+            if from_row == to_row or from_col == to_col:
+                if self.is_path_clear(from_row, from_col, to_row, to_col):
+                    return True
+
+        # Lógica para el alfil (A/a)
+        if piece in ("A", "a"):
+            if abs(from_row - to_row) == abs(from_col - to_col):
+                if self.is_path_clear(from_row, from_col, to_row, to_col):
+                    return True
+
+        # Lógica para la reina (D/d)
+        if piece in ("D", "d"):
+            if from_row == to_row or from_col == to_col or abs(from_row - to_row) == abs(from_col - to_col):
+                if self.is_path_clear(from_row, from_col, to_row, to_col):
+                    return True
+
+        # Lógica para el rey (R/r)
+        if piece in ("R", "r"):
+            if max(abs(from_row - to_row), abs(from_col - to_col)) == 1:
+                return True
+
         return False
+
+    def is_path_clear(self, from_row, from_col, to_row, to_col):
+        """Verifica si no hay piezas bloqueando el camino para movimientos de torre, alfil y reina."""
+        step_row = (to_row - from_row) and (to_row - from_row) // abs(to_row - from_row)
+        step_col = (to_col - from_col) and (to_col - from_col) // abs(to_col - from_col)
+
+        current_row, current_col = from_row + step_row, from_col + step_col
+        while (current_row, current_col) != (to_row, to_col):
+            if self.board1_state[current_row][current_col] != ".":
+                return False  # Hay una pieza bloqueando el camino
+            current_row += step_row
+            current_col += step_col
+
+        return True
 
 # Crear ventana principal
 if __name__ == "__main__":
